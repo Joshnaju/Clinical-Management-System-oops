@@ -1,8 +1,8 @@
 # from database import Database
+from utils.helper import Helper
 from utils.exceptions import BackRequested
 from utils.validator import Validator
 from datetime import date
-from utils.helper import Helper
 
 class Patient:
     def __init__(self, db, user):
@@ -277,70 +277,75 @@ class Patient:
     4. Email
     5. Back
     """)
+            Helper.show_back_option()
+            try:
+                choice = Helper.get_input("Enter your choice : ")
 
-            choice = input("Enter your choice : ")
-
-            match choice:
-                case "1":
-                    value = input("Enter Patient ID : ").strip().upper()
-
-                    query = """
-                    SELECT patient_code,name,dob,address,phone,email,blood_group,gender
-                    FROM patients
-                    WHERE patient_code=%s AND is_active=TRUE
-                    """
-
-                    values = (value,)
-
-                case "2":
-                    value = input("Enter Name : ").strip()
-
-                    query = """
-                    SELECT patient_code,name,dob,address,phone,email,blood_group,gender
-                    FROM patients
-                    WHERE name LIKE %s AND is_active=TRUE
-                    """
-
-                    values = (f"%{value}%",)
-
-                case "3":
-
-                    while True:
-                        value = input("Enter Phone Number : ").strip()
-
-                        if not value:
-                            print("Phone number is required.")
-                            continue
-
-                        if not value.isdigit():
-                            print("Phone number should contain only digits.")
-                            continue
+                match choice:
+                    case "1":
+                        value = Helper.get_input("Enter Patient ID : ").strip().upper()
 
                         query = """
                         SELECT patient_code,name,dob,address,phone,email,blood_group,gender
                         FROM patients
-                        WHERE phone=%s AND is_active=TRUE
+                        WHERE patient_code=%s AND is_active=TRUE
                         """
 
                         values = (value,)
 
-                case "4":
-                    value = input("Enter Email : ").strip()
+                    case "2":
+                        value = Helper.get_input("Enter Name : ")
 
-                    query = """
-                    SELECT patient_code,name,dob,address,phone,email,blood_group,gender
-                    FROM patients
-                    WHERE email=%s AND is_active=TRUE
-                    """
+                        query = """
+                        SELECT patient_code,name,dob,address,phone,email,blood_group,gender
+                        FROM patients
+                        WHERE name LIKE %s AND is_active=TRUE
+                        """
 
-                    values = (value,)
+                        values = (f"%{value}%",)
 
-                case "5":
-                    return
+                    case "3":
 
-                case _:
-                    print("Invalid Choice")
-                    continue
+                        while True:
+                            value = Helper.get_input("Enter Phone Number : ")
+
+                            if not value:
+                                print("Phone number is required.")
+                                continue
+
+                            if not value.isdigit():
+                                print("Phone number should contain only digits.")
+                                continue
+
+                            query = """
+                            SELECT patient_code,name,dob,address,phone,email,blood_group,gender
+                            FROM patients
+                            WHERE phone=%s AND is_active=TRUE
+                            """
+
+                            values = (value,)
+
+                    case "4":
+                        value = Helper.get_input("Enter Email : ")
+
+                        query = """
+                        SELECT patient_code,name,dob,address,phone,email,blood_group,gender
+                        FROM patients
+                        WHERE email=%s AND is_active=TRUE
+                        """
+
+                        values = (value,)
+
+                    case "5":
+                        return
+
+                    case _:
+                        print("Invalid Choice")
+                        continue
+
+            except BackRequested:
+                print("\nReturning to previous menu.")
+                return
                 
             self.db.execute_query(query, values)
             patients = self.db.fetch_all()
@@ -388,137 +393,142 @@ class Patient:
         UPDATE PATIENT
 ====================================
         """)
+            Helper.show_back_option()
+            try:
 
-            patient_code = input("Enter Patient Code : ").strip().upper()
+                patient_code = Helper.get_input("Enter Patient Code : ").upper()
 
-            query = """
-            SELECT *
-            FROM patients
-            WHERE patient_code=%s
-            AND is_active=TRUE
-            """
+                query = """
+                SELECT *
+                FROM patients
+                WHERE patient_code=%s
+                AND is_active=TRUE
+                """
 
-            self.db.execute_query(query, (patient_code,))
-            patient = self.db.fetch_one()
+                self.db.execute_query(query, (patient_code,))
+                patient = self.db.fetch_one()
 
-            if not patient:
-                print("\nPatient not found.")
-                continue
+                if not patient:
+                    print("\nPatient not found.")
+                    continue
 
-            print("\nLeave blank to keep existing value.\n")
+                print("\nLeave blank to keep existing value.\n")
 
-            #NAME
-            while True:
-                name = input(f"Name [{patient['name']}] : ").strip()
+                #NAME
+                while True:
+                    name = Helper.get_input(f"Name [{patient['name']}] : ").strip()
 
-                if name == "":
-                    name = patient["name"]
-                    break
+                    if name == "":
+                        name = patient["name"]
+                        break
 
-                if Validator.validate_name(name):
-                    break
+                    if Validator.validate_name(name):
+                        break
 
-                print("Name should contain only letters and be 3-40 characters.")
+                    print("Name should contain only letters and be 3-40 characters.")
 
-            #DOB
-            while True:
-                dob = input(f"DOB [{patient['dob']}] : ").strip()
+                #DOB
+                while True:
+                    dob = Helper.get_input(f"DOB [{patient['dob']}] : ").strip()
 
-                if dob == "":
-                    dob = patient["dob"]
-                    break
+                    if dob == "":
+                        dob = patient["dob"]
+                        break
 
-                valid, message = Validator.validate_dob(dob)
+                    valid, message = Validator.validate_dob(dob)
 
-                if valid:
-                    break
+                    if valid:
+                        break
 
-                print(message)
+                    print(message)
 
-            #ADDRESS
-            while True:
-                address = input(f"Address [{patient['address']}] : ").strip()
+                #ADDRESS
+                while True:
+                    address = Helper.get_input(f"Address [{patient['address']}] : ").strip()
 
-                if address == "":
-                    address = patient["address"]
-                    break
+                    if address == "":
+                        address = patient["address"]
+                        break
 
-                if Validator.validate_address(address):
-                    break
+                    if Validator.validate_address(address):
+                        break
 
-                print("Invalid address.")
+                    print("Invalid address.")
 
-            #PHONE
-            while True:
-                phone = input(f"Phone [{patient['phone']}] : ").strip()
+                #PHONE
+                while True:
+                    phone = Helper.get_input(f"Phone [{patient['phone']}] : ").strip()
 
-                if phone == "":
-                    phone = patient["phone"]
-                    break
+                    if phone == "":
+                        phone = patient["phone"]
+                        break
 
-                if Validator.validate_phone(phone):
-                    break
+                    if Validator.validate_phone(phone):
+                        break
 
-                print("Invalid phone number.")
+                    print("Invalid phone number.")
 
-            #EMAIL
-            while True:
-                email = input(f"Email [{patient['email']}] : ").strip()
+                #EMAIL
+                while True:
+                    email = Helper.get_input(f"Email [{patient['email']}] : ").strip()
 
-                if email == "":
-                    email = patient["email"]
-                    break
+                    if email == "":
+                        email = patient["email"]
+                        break
 
-                if Validator.validate_email(email):
-                    break
+                    if Validator.validate_email(email):
+                        break
 
-                print("Invalid email.")
+                    print("Invalid email.")
 
-            #Blood Group
-            print("""
-    Blood Group
+                #Blood Group
+                print("""
+        Blood Group
 
-    1. A+
-    2. A-
-    3. B+
-    4. B-
-    5. AB+
-    6. AB-
-    7. O+
-    8. O-
-    """)
+        1. A+
+        2. A-
+        3. B+
+        4. B-
+        5. AB+
+        6. AB-
+        7. O+
+        8. O-
+        """)
 
-            while True:
+                while True:
 
-                choice = input(f"Blood Group [{patient['blood_group']}] : ").strip()
+                    choice = Helper.get_input(f"Blood Group [{patient['blood_group']}] : ").strip()
 
-                if choice == "":
-                    blood_group = patient["blood_group"]
-                    break
+                    if choice == "":
+                        blood_group = patient["blood_group"]
+                        break
 
-                valid, result = Validator.validate_blood_group(choice)
+                    valid, result = Validator.validate_blood_group(choice)
 
-                if valid:
-                    blood_group = result
-                    break
+                    if valid:
+                        blood_group = result
+                        break
 
-                print(result)
+                    print(result)
 
-            #Gender
-            while True:
-                gender = input(f"Gender [{patient['gender']}] (M/F/O): ").strip()
+                #Gender
+                while True:
+                    gender = Helper.get_input(f"Gender [{patient['gender']}] (M/F/O): ").strip()
 
-                if gender == "":
-                    gender = patient["gender"]
-                    break
+                    if gender == "":
+                        gender = patient["gender"]
+                        break
 
-                valid, result = Validator.validate_gender(gender)
+                    valid, result = Validator.validate_gender(gender)
 
-                if valid:
-                    gender = result
-                    break
+                    if valid:
+                        gender = result
+                        break
 
-                print(result)
+                    print(result)
+            except BackRequested:
+                print("\nReturning to previous menu.")
+                return
 
             #update query
             query = """
@@ -559,13 +569,18 @@ class Patient:
     """)
 
         while True:
-            patient_code = input("Enter Patient Code : ").strip().upper()
+            Helper.show_back_option()
+            try:
+                patient_code = Helper.get_input("Enter Patient Code : ").strip().upper()
 
-            if not patient_code:
-                print("Patient Code is required.")
-                continue
+                if not patient_code:
+                    print("Patient Code is required.")
+                    continue
 
-            break
+                break
+            except BackRequested:
+                print("\nReturning to previous menu.")
+                return
 
         query = """
         SELECT patient_code, name, phone, email
@@ -589,7 +604,12 @@ class Patient:
         print(f"Email        : {patient['email']}")
 
         while True:
-            confirm = input("\nDisable this patient? (Y/N): ").strip().upper()
+            try:
+                confirm = Helper.get_input("\nDisable this patient? (Y/N): ").strip().upper()
+
+            except BackRequested:
+                print("\nReturning to previous menu.")
+                return
 
             if confirm == "Y":
                 query = """

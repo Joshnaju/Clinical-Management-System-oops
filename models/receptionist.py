@@ -1,5 +1,7 @@
 from models.appointment import Appointment
 from models.patient import Patient
+from utils.exceptions import BackRequested
+from utils.helper import Helper
 
 class Receptionist:
     def __init__(self, db, user):
@@ -21,22 +23,26 @@ class Receptionist:
 
 =====================================
 """)
+            Helper.show_back_option()
+            try:
+                choice = Helper.get_input("Enter your choice: ")
 
-            choice = input("Enter your choice: ")
+                match choice:
+                    case "1":
+                        self.patient_management()
 
-            match choice:
-                case "1":
-                    self.patient_management()
+                    case "2":
+                        self.scheduling()
 
-                case "2":
-                    self.scheduling()
+                    case "3":
+                        print("Logging out...")
+                        break
 
-                case "3":
-                    print("Logging out...")
-                    break
-
-                case _:
-                    print("Invalid choice.")
+                    case _:
+                        print("Invalid choice.")
+            except BackRequested:
+                print("Returning to the previous menu...")
+                break
 
 
     def patient_management(self):
@@ -55,30 +61,33 @@ class Receptionist:
 
 ===========================
 """)
+            Helper.show_back_option()
+            try:
+                choice = Helper.get_input("Enter choice : ")
+                match choice:
+                    case "1":
+                        self.patient.register_patient()
 
-            choice = input("Enter choice : ")
-            match choice:
-                case "1":
-                    self.patient.register_patient()
+                    case "2":
+                        self.patient.view_patients()
 
-                case "2":
-                    self.patient.view_patients()
+                    case "3":
+                        self.patient.search_patient()
 
-                case "3":
-                    self.patient.search_patient()
+                    case "4":
+                        self.patient.update_patient()
 
-                case "4":
-                    self.patient.update_patient()
+                    case "5":
+                        self.patient.disable_patient()
 
-                case "5":
-                    self.patient.disable_patient()
+                    case "6":
+                        break
 
-                case "6":
-                    break
-
-                case _:
-                    print("Invalid choice.")
-
+                    case _:
+                        print("Invalid choice.")
+            except BackRequested:
+                print("Returning to the previous menu...")
+                break
 
     def scheduling(self):
         while True:
@@ -92,21 +101,26 @@ class Receptionist:
 2. Walk-in Consultation
 3. Back
     """)
+            Helper.show_back_option()
+            try:
+                choice = Helper.get_input("Enter your choice : ")
 
-            choice = input("Enter your choice : ").strip()
+                match choice:
 
-            match choice:
+                    case "1":
+                        self.appointment.book_appointment()
 
-                case "1":
-                    self.appointment.book_appointment()
+                    case "2":
+                        self.appointment.walkin_consultation()
 
-                case "2":
-                    self.appointment.walkin_consultation()
+                    case "3":
+                        break
 
-                case "3":
-                    return
-
-                case _:
-                    print("Invalid Choice.")
+                    case _:
+                        print("Invalid Choice.")
+            except BackRequested:
+                print("Returning to the previous menu...")
+                break
+                    
 
   

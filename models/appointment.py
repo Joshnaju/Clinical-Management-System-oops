@@ -1,6 +1,8 @@
 import datetime
 from enums import Role
 from models.patient import Patient
+from utils.exceptions import BackRequested
+from utils.helper import Helper
 
 class Appointment:
     def __init__(self, db, user):
@@ -62,26 +64,30 @@ class Appointment:
 3. Back
     """)
 
-            choice = input("Enter choice : ").strip()
+            Helper.show_back_option()
+            try:
+                choice = Helper.get_input("Enter choice : ").strip()
 
-            match choice:
+                match choice:
 
-                case "1":
+                    case "1":
 
-                    patient_code = self.patient.register_patient()
+                        patient_code = self.patient.register_patient()
 
-                    if patient_code:
-                        self.schedule_appointment(patient_code, False)
+                        if patient_code:
+                            self.schedule_appointment(patient_code, False)
 
-                case "2":
+                    case "2":
 
-                    self.schedule_appointment()
+                        self.schedule_appointment()
 
-                case "3":
-                    return
+                    case "3":
+                        return
 
-                case _:
-                    print("Invalid Choice.")
+                    case _:
+                        print("Invalid Choice.")
+            except BackRequested:
+                return
 
     def walkin_consultation(self):
             while True:
@@ -95,26 +101,30 @@ class Appointment:
 2. Existing Patient
 3. Back
         """)
+                try:
+                    Helper.show_back_option()
+                    choice = Helper.get_input("Enter choice : ")
 
-                choice = input("Enter choice : ").strip()
+                    match choice:
+                        case "1":
 
-                match choice:
-                    case "1":
+                            patient_code = self.patient.register_patient()
 
-                        patient_code = self.patient.register_patient()
+                            if patient_code:
+                                self.schedule_appointment(patient_code, True)
 
-                        if patient_code:
-                            self.schedule_appointment(patient_code, True)
+                        case "2":
+                            self.schedule_appointment(is_walkin=True)
 
-                    case "2":
-                        self.schedule_appointment(is_walkin=True)
+                        case "3":
+                            return
 
-                    case "3":
-                        return
-
-                    case _:
-                        print("Invalid Choice.")
-
+                        case _:
+                            print("Invalid Choice.")
+                except BackRequested:
+                    print("Returning to the previous menu...")
+                    return
+                
 def schedule_appointment(self, patient_code=None, is_walkin=False):
 
     while True:
@@ -124,158 +134,164 @@ def schedule_appointment(self, patient_code=None, is_walkin=False):
 ====================================
 """)
 
-        # -----------------------------
-        # Patient
-        # -----------------------------
-        if patient_code is None:
-            patient_code = input("Enter Patient Code : ").strip().upper()
+    
+        Helper.show_back_option()
+        try:
+            # -----------------------------
+            # Patient
+            # -----------------------------
+            if patient_code is None:
+                patient_code = Helper.get_input("Enter Patient Code : ").strip().upper()
 
-        if not patient_code:
-            print("Patient Code is required.")
-            patient_code = None
-            continue
+            if not patient_code:
+                print("Patient Code is required.")
+                patient_code = None
+                continue
 
-        query = """
-        SELECT patient_id, patient_code, name
-        FROM patients
-        WHERE patient_code=%s
-        AND is_active=TRUE
-        """
+            query = """
+            SELECT patient_id, patient_code, name
+            FROM patients
+            WHERE patient_code=%s
+            AND is_active=TRUE
+            """
 
-        self.db.execute_query(query, (patient_code,))
-        patient = self.db.fetch_one()
+            self.db.execute_query(query, (patient_code,))
+            patient = self.db.fetch_one()
 
-        if not patient:
-            print("\nPatient not found.\n")
-            patient_code = None
-            continue
+            if not patient:
+                print("\nPatient not found.\n")
+                patient_code = None
+                continue
 
-        print(f"\nPatient : {patient['name']}")
+            print(f"\nPatient : {patient['name']}")
 
-        # -----------------------------
-        # Department
-        # -----------------------------
-        print("""
-Departments
+            # -----------------------------
+            # Department
+            # -----------------------------
+            print("""
+    Departments
 
-1. General Medicine
-2. Cardiology
-3. Orthopedics
-4. Pediatrics
-5. ENT
-6. Dermatology
-7. Neurology
-8. Gynecology
-""")
+    1. General Medicine
+    2. Cardiology
+    3. Orthopedics
+    4. Pediatrics
+    5. ENT
+    6. Dermatology
+    7. Neurology
+    8. Gynecology
+    """)
 
-        departments = {
-            "1": "General Medicine",
-            "2": "Cardiology",
-            "3": "Orthopedics",
-            "4": "Pediatrics",
-            "5": "ENT",
-            "6": "Dermatology",
-            "7": "Neurology",
-            "8": "Gynecology"
-        }
-
-        while True:
-
-            choice = input("Choose Department : ").strip()
-
-            if choice in departments:
-                department = departments[choice]
-                break
-
-            print("Invalid Department.")
-
-        # -----------------------------
-        # Doctors
-        # -----------------------------
-        query = """
-        SELECT user_id,
-               user_code,
-               name
-        FROM users
-        WHERE role=%s
-        AND department=%s
-        AND is_active=TRUE
-        """
-
-        values = (Role.DOCTOR, department)
-
-        self.db.execute_query(query, values)
-
-        doctors = self.db.fetch_all()
-
-        if not doctors:
-            print("\nNo doctors available.\n")
-            continue
-
-        print("\nAvailable Doctors\n")
-
-        for doctor in doctors:
-            print(f"{doctor['user_code']} - {doctor['name']}")
-
-        while True:
-
-            doctor_code = input("\nEnter Doctor Code : ").strip().upper()
-
-            selected = None
-
-            for doctor in doctors:
-
-                if doctor["user_code"] == doctor_code:
-                    selected = doctor
-                    break
-
-            if selected:
-                doctor_id = selected["user_id"]
-                doctor_name = selected["name"]
-                break
-
-            print("Invalid Doctor Code.")
-
-        # -----------------------------
-        # Appointment Date
-        # -----------------------------
-        if is_walkin:
-
-            appointment_date = datetime.today().date()
-
-            print(f"\nAppointment Date : {appointment_date}")
-
-        else:
+            departments = {
+                "1": "General Medicine",
+                "2": "Cardiology",
+                "3": "Orthopedics",
+                "4": "Pediatrics",
+                "5": "ENT",
+                "6": "Dermatology",
+                "7": "Neurology",
+                "8": "Gynecology"
+            }
 
             while True:
 
-                date_input = input(
-                    "Appointment Date (YYYY-MM-DD): "
-                ).strip()
+                choice = Helper.get_input("Choose Department : ")
 
-                try:
-
-                    appointment_date = datetime.strptime(
-                        date_input,
-                        "%Y-%m-%d"
-                    ).date()
-
-                    today = datetime.today().date()
-
-                    if appointment_date < today:
-                        print("Past date not allowed.")
-                        continue
-
-                    if appointment_date > today + datetime.timedelta(days=2):
-                        print(
-                            "Booking allowed only for today and next 2 days."
-                        )
-                        continue
-
+                if choice in departments:
+                    department = departments[choice]
                     break
 
-                except:
-                    print("Invalid Date.")
+                print("Invalid Department.")
+
+            # -----------------------------
+            # Doctors
+            # -----------------------------
+            query = """
+            SELECT user_id,
+                user_code,
+                name
+            FROM users
+            WHERE role=%s
+            AND department=%s
+            AND is_active=TRUE
+            """
+
+            values = (Role.DOCTOR, department)
+
+            self.db.execute_query(query, values)
+
+            doctors = self.db.fetch_all()
+
+            if not doctors:
+                print("\nNo doctors available.\n")
+                continue
+
+            print("\nAvailable Doctors\n")
+
+            for doctor in doctors:
+                print(f"{doctor['user_code']} - {doctor['name']}")
+
+            while True:
+
+                doctor_code = Helper.get_input("\nEnter Doctor Code : ").upper()
+
+                selected = None
+
+                for doctor in doctors:
+
+                    if doctor["user_code"] == doctor_code:
+                        selected = doctor
+                        break
+
+                if selected:
+                    doctor_id = selected["user_id"]
+                    doctor_name = selected["name"]
+                    break
+
+                print("Invalid Doctor Code.")
+
+            # -----------------------------
+            # Appointment Date
+            # -----------------------------
+            if is_walkin:
+
+                appointment_date = datetime.today().date()
+
+                print(f"\nAppointment Date : {appointment_date}")
+
+            else:
+
+                while True:
+
+                    date_input = Helper.get_input(
+                        "Appointment Date (YYYY-MM-DD): "
+                    )
+
+                    try:
+
+                        appointment_date = datetime.strptime(
+                            date_input,
+                            "%Y-%m-%d"
+                        ).date()
+
+                        today = datetime.today().date()
+
+                        if appointment_date < today:
+                            print("Past date not allowed.")
+                            continue
+
+                        if appointment_date > today + datetime.timedelta(days=2):
+                            print(
+                                "Booking allowed only for today and next 2 days."
+                            )
+                            continue
+
+                        break
+
+                    except:
+                        print("Invalid Date.")
+        except BackRequested:
+            print("Returning to the previous menu...")
+            return
 
         # -----------------------------
         # Token
