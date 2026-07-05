@@ -19,11 +19,11 @@ class Receptionist:
 
 1. Patient Management
 2. Scheduling
-3. Logout
+3. Appointment Management
+4. Logout
 
 =====================================
 """)
-            Helper.show_back_option()
             try:
                 choice = Helper.get_input("Enter your choice: ")
 
@@ -35,8 +35,11 @@ class Receptionist:
                         self.scheduling()
 
                     case "3":
+                        self.appointment_management()
+
+                    case "4":
                         print("Logging out...")
-                        break
+                        return
 
                     case _:
                         print("Invalid choice.")
@@ -48,9 +51,9 @@ class Receptionist:
     def patient_management(self):
         while True:
             print("""
-===========================
+=====================================
     Patient Management
-===========================
+=====================================
 
 1. Register Patient
 2. View Patient
@@ -59,7 +62,7 @@ class Receptionist:
 5. Disable Patient
 6. Back
 
-===========================
+=====================================
 """)
             Helper.show_back_option()
             try:
@@ -93,9 +96,9 @@ class Receptionist:
         while True:
 
             print("""
-====================================
+=====================================
     APPOINTMENT SCHEDULING
-====================================
+=====================================
 
 1. Book Appointment
 2. Walk-in Consultation
@@ -122,5 +125,39 @@ class Receptionist:
                 print("Returning to the previous menu...")
                 break
                     
+    def appointment_management(self):
+        while True:
+            print("""
+====================================
+      APPOINTMENT MENU
+====================================
 
-  
+1. View Appointments
+2. Search Appointment
+3. Cancel Appointment
+4. Back
+
+====================================
+""")
+            Helper.show_back_option()
+            try:
+                choice = Helper.get_input("Enter your choice : ")
+
+                match choice:
+                    case "1":
+                        self.appointment.view_appointments()
+
+                    case "2":
+                        self.appointment.search_appointment()
+
+                    case"3":
+                        self.appointment.cancel_appointment()
+
+                    case "4":
+                        return
+
+                    case _:
+                        print("Invalid choice.")
+            except BackRequested:
+                print("Returning to the previous menu...")
+                break

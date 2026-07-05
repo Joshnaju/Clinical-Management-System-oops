@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from utils.exceptions import BackRequested
 
 class Helper:
@@ -37,3 +37,10 @@ class Helper:
             raise BackRequested()
 
         return value
+    
+    @staticmethod
+    def is_walkin_available():
+        current_time = datetime.now().time()
+        clinic_end = datetime.strptime("13:00", "%H:%M").time()
+
+        return current_time < clinic_end

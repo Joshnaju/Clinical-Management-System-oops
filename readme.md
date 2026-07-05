@@ -95,20 +95,10 @@ Clinical Management System
 validator.py
 token_generator.py
 
-when logout go to login page
 implement encapsulation
-type "back" to go back to the previous menu
 
-scheduling:
-1.book appointment
-2.consultation(walkin)
-3.back
+created_by = Rec01 (unchanged)
+created_at = 2026-07-01 (unchanged)
 
-book appointment: can only book 2 days before
-
-1. for new patient->first register the patient and then go to schedule appointment
-2. existing patient->schedule appointment
-3. back
-
-consultation:
-walkin patient means-so appointment date should be selected as current date
+updated_by = Rec02 (changes)
+updated_at = 2026-07-04 (changes)

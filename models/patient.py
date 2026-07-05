@@ -1,4 +1,3 @@
-# from database import Database
 from utils.helper import Helper
 from utils.exceptions import BackRequested
 from utils.validator import Validator
@@ -25,6 +24,7 @@ class Patient:
             created_by INT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             is_active BOOLEAN DEFAULT TRUE,
+            registration_fee_paid BOOLEAN DEFAULT FALSE,
 
             FOREIGN KEY (created_by) REFERENCES users(user_id)
         )"""
@@ -34,9 +34,9 @@ class Patient:
 
     def register_patient(self):
         print("""
-====================================
+=====================================
         PATIENT REGISTRATION
-====================================
+=====================================
 """)
         
         Helper.show_back_option()
@@ -190,6 +190,9 @@ class Patient:
 
         print("\nPatient Registered Successfully.")
         print("Patient Code :", patient_code)
+        patient_id = self.db.last_insert_id()
+
+        return patient_code,patient_id,name
 
     def generate_patient_code(self):
         query = "SELECT COUNT(*) FROM patients"
@@ -199,83 +202,81 @@ class Patient:
 
     def view_patients(self):
 
-        query = """
-        SELECT
-            p.patient_code,
-            p.name,
-            p.dob,
-            p.address,
-            p.phone,
-            p.email,
-            p.blood_group,
-            p.gender,
-            u.name AS registered_by,
-            p.created_at
-        FROM patients p
-        INNER JOIN users u
-            ON p.created_by = u.user_id
-        WHERE p.is_active = TRUE
-        ORDER BY p.patient_code;
-        """
+            query = """
+            SELECT
+                p.patient_code,
+                p.name,
+                p.dob,
+                p.address,
+                p.phone,
+                p.email,
+                p.blood_group,
+                p.gender,
+                u.name AS registered_by,
+                p.created_at
+            FROM patients p
+            INNER JOIN users u
+                ON p.created_by = u.user_id
+            WHERE p.is_active = TRUE
+            ORDER BY p.patient_code;
+            """
 
-        self.db.execute_query(query)
-        patients = self.db.fetch_all()
+            self.db.execute_query(query)
+            patients = self.db.fetch_all()
 
-        if not patients:
-            print("\nNo patients found.")
-            return
+            if not patients:
+                print("\nNo patients found.")
+                return
 
-        print("\n" + "=" * 133)
-
-        print(
-            f"{'Patient Code':<6} | "
-            f"{'Name':<12} | "
-            f"{'Age':<6} | "
-            f"{'Gender':<3} | "
-            f"{'Blood':<5} | "
-            f"{'Phone':<10} | "
-            f"{'Email':<10} | "
-            f"{'Registered By':<15} | "
-            f"{'Registered On':<15} | "
-            f"{'Address':<20}"
-        )
-
-        print("-" * 133)
-
-        today = date.today()
-
-        for patient in patients:
-
-            age_display = Helper.calculate_age(patient["dob"])
+            print("\n" + "=" * 133)
 
             print(
-                f"{patient['patient_code']:<6} | "
-                f"{patient['name']:<12} | "
-                f"{age_display:<6} | "
-                f"{patient['gender']:<3} | "
-                f"{patient['blood_group']:<5} | "
-                f"{patient['phone']:<10} | "
-                f"{patient['email']:<10} | "
-                f"{patient['registered_by']:<15} | "
-                f"{patient['created_at'].strftime('%d-%m-%Y %H:%M'):<15} | "
-                f"{patient['address']:<20}"
+                f"{'Patient Code':^6} | "
+                f"{'Name':^12} | "
+                f"{'Age':^6} | "
+                f"{'Gender':^3} | "
+                f"{'Blood':^5} | "
+                f"{'Phone':^10} | "
+                f"{'Email':^10} | "
+                f"{'Registered By':^15} | "
+                f"{'Registered On':^15} | "
+                f"{'Address':^20}"
             )
-            
-        print("-" * 133)
-        print(f"Total Patients : {len(patients)}")
 
+            print("-" * 133)
+
+            today = date.today()
+
+            for patient in patients:
+
+                age_display = Helper.calculate_age(patient["dob"])
+                print(
+                f"{patient['patient_code']:^6} | "
+                f"{patient['name']:^12} | "
+                f"{age_display:^6} | "
+                f"{patient['gender']:^3} | "
+                f"{patient['blood_group']:^5} | "
+                f"{patient['phone']:^10} | "
+                f"{patient['email']:^10} | "
+                f"{patient['registered_by']:^15} | "
+                f"{patient['created_at'].strftime('%d-%m-%Y %H:%M'):^15} | "
+                f"{patient['address']:^20}"
+                )
+                
+            print("-" * 133)
+            print(f"Total Patients : {len(patients)}")
 
     def search_patient(self):
         while True:
             print("""
-    ==============================
-            SEARCH PATIENT
-    ==============================
-    1. Patient ID
-    2. Name
-    3. Phone Number
-    4. Email
-    5. Back
+=====================================
+        SEARCH PATIENT
+=====================================
+1. Patient ID
+2. Name
+3. Phone Number
+4. Email
+5. Back
     """)
             Helper.show_back_option()
             try:
@@ -313,8 +314,8 @@ class Patient:
                                 print("Phone number is required.")
                                 continue
 
-                            if not value.isdigit():
-                                print("Phone number should contain only digits.")
+                            if not Validator.validate_phone(value):
+                                print("Phone number must contain 10 digits and start with 6, 7, 8, or 9.")
                                 continue
 
                             query = """
@@ -324,6 +325,7 @@ class Patient:
                             """
 
                             values = (value,)
+                            break
 
                     case "4":
                         value = Helper.get_input("Enter Email : ")
@@ -389,9 +391,9 @@ class Patient:
     def update_patient(self):
         while True:
             print("""
-====================================
+=====================================
         UPDATE PATIENT
-====================================
+=====================================
         """)
             Helper.show_back_option()
             try:
@@ -563,9 +565,9 @@ class Patient:
 
     def disable_patient(self):
         print("""
-====================================
+=====================================
         DISABLE PATIENT
-====================================
+=====================================
     """)
 
         while True:

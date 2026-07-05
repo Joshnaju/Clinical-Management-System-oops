@@ -18,3 +18,12 @@ class BloodGroup(StrEnum):
     AB_NEG = "AB-"
     O_POS = "O+"
     O_NEG = "O-"
+
+class AppointmentStatus(StrEnum):
+    SCHEDULED = "Scheduled"
+    COMPLETED = "Completed"
+    CANCELLED = "Cancelled"
+
+class BillingStatus(StrEnum):
+    PAID="paid",
+    PENDING="pending"

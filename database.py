@@ -36,3 +36,5 @@ class Database:
         self.cursor.close()
         self.dbobj.close()
 
+    def last_insert_id(self):
+        return self.cursor.lastrowid

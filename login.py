@@ -9,7 +9,6 @@ class Login:
         self.db = Database()
 
     def login(self):
-
         while True:
             print("""
 +--------------------------------+
@@ -24,7 +23,7 @@ class Login:
             SELECT *
             FROM users
             WHERE user_code=%s
-            AND password=%s
+            AND BINARY password=%s
             AND is_active=True
             """
             values = (username, password)
@@ -44,8 +43,6 @@ class Login:
                     print(f"Welcome Receptionist, {user['name']}")
                     receptionist = Receptionist(self.db,user)
                     receptionist.dashboard()
-
-                break    
             else:
                 print("\nInvalid Username or Password. Please try again.\n")
 
