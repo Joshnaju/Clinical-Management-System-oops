@@ -38,3 +38,6 @@ class Database:
 
     def last_insert_id(self):
         return self.cursor.lastrowid
+    
+    def rollback(self):
+        self.dbobj.rollback()

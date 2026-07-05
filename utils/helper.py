@@ -41,6 +41,23 @@ class Helper:
     @staticmethod
     def is_walkin_available():
         current_time = datetime.now().time()
-        clinic_end = datetime.strptime("13:00", "%H:%M").time()
+        clinic_end = datetime.strptime("18:00", "%H:%M").time()
 
         return current_time < clinic_end
+    
+    @staticmethod
+    def format_mysql_time(value):
+        hours = value.seconds // 3600
+        minutes = (value.seconds % 3600) // 60
+
+        suffix = "AM"
+
+        if hours >= 12:
+            suffix = "PM"
+
+        display_hour = hours % 12
+
+        if display_hour == 0:
+            display_hour = 12
+
+        return f"{display_hour:02}:{minutes:02} {suffix}"

@@ -6,6 +6,7 @@ from models.patient import Patient
 from utils.exceptions import BackRequested
 from utils.helper import Helper
 from models.billing import Billing
+from utils.constants import CLINIC_START_TIME, CLINIC_END_TIME, SLOT_DURATION
 class Appointment:
     def __init__(self, db, user):
         self.db = db
@@ -314,7 +315,7 @@ class Appointment:
             count = self.db.fetch_one()["total"]
 
             current_time = datetime.now().time()
-            clinic_end = datetime.strptime("13:00", "%H:%M").time()
+            clinic_end = datetime.strptime("18:00", "%H:%M").time()
 
             if appointment_date == date.today() and current_time >= clinic_end:
                 print("\nToday's consultation time is over.")
@@ -356,10 +357,10 @@ class Appointment:
             # Consultation Time
             # -----------------------------
 
-            clinic_start = datetime.strptime("09:00", "%H:%M")
-            clinic_end = datetime.strptime("13:00", "%H:%M")
+            clinic_start = datetime.strptime(CLINIC_START_TIME, "%H:%M")
+            clinic_end = datetime.strptime(CLINIC_END_TIME, "%H:%M")
 
-            slot_duration = 15
+            slot_duration = SLOT_DURATION
 
             max_slots = int((clinic_end - clinic_start).total_seconds() // (slot_duration * 60))
 

@@ -1,5 +1,6 @@
 from database import Database
 from enums import Role
+from models.doctor import Doctor
 from models.patient import Patient
 from models.receptionist import Receptionist
 
@@ -37,7 +38,8 @@ class Login:
 
                 if role == Role.DOCTOR:
                     print(f"Welcome Doctor, {user['name']}")
-                    # Doctor().dashboard()
+                    doctor = Doctor(self.db,user)
+                    doctor.dashboard()
 
                 elif role == Role.RECEPTIONIST:
                     print(f"Welcome Receptionist, {user['name']}")
