@@ -137,5 +137,5 @@ Payment Mode
             self.db.execute_query(query, (patient["patient_id"],))
             self.db.commit()
 
-        bill_id = self.db.cursor.lastrowid
+        bill_id = self.db.last_insert_id()
         return True, bill_id

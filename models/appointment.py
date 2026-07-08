@@ -406,7 +406,7 @@ class Appointment:
 
             self.db.execute_query(query, values)
             self.db.commit()
-            appointment_id = self.db.cursor.lastrowid
+            appointment_id = self.db.last_insert_id()
 
             print("""
 ====================================
@@ -458,7 +458,7 @@ Appointment Scheduled Successfully
                 ON a.doctor_id = u.user_id
             WHERE p.is_active = TRUE
             ORDER BY
-                a.appointment_date,
+                a.appointment_date Desc,
                 u.name,
                 a.token_number
             """

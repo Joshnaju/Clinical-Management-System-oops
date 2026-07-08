@@ -6,4 +6,3 @@ try:
 
 finally:
     obj.db.close()
-

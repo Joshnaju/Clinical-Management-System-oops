@@ -102,5 +102,3 @@ created_at = 2026-07-01 (unchanged)
 
 updated_by = Rec02 (changes)
 updated_at = 2026-07-04 (changes)
-
-show patient,age,gender in doctor view appointments
